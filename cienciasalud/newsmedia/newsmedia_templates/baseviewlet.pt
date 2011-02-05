@@ -1,43 +1,145 @@
-<div id="news-media-wrapper" tal:define="viewlet_id viewlet/__name__;
+<div id="media-wrapper" tal:define="viewlet_id viewlet/__name__;
                                         here_url context/@@plone_context_state/object_url;
                                         cols string:5;">
-    <tal:media condition="viewlet/newsmedia/hasContainer"
-        define="media context/media;
-                img_keys media/keys;
-                key_no   python: int(cols)-len(img_keys);
-                lines python: viewlet.imageRows(cols, img_keys);">
-            
-    <div id="newsmedia-nav" tal:condition="lines">
-        <a class="prev browse left" tal:condition="python: key_no < 0"></a>
-        <div class="scrollable">
-            <div class="items">
-                <ul class="line" tal:repeat="line lines">
-                <tal:row repeat="item line">
-                <li class="imgwrap"><img src="img" tal:attributes="src string:$here_url/media/$item/thumb;  alt python: media[item].title" /></li>
-                </tal:row>
-                </ul>
-            </div>
-            <div class="visualClear"></div>
-            <!--tal:content="string:VIEWLET: ${viewlet_id}"-->
-        </div>
-        <a class="next browse right" tal:condition="python: key_no < 0"></a>
-    </div>
+
+    <tal:media condition="not:exists:context/media">
+        <a id="add_media" href="add" tal:attributes="href string:$here_url/add_media">Añadir medios</a>
     <script>
         // execute your scripts when the DOM is ready. this is mostly a good habit
         jQuery(function($) {
 
             // initialize scrollable
-            $(".scrollable").scrollable();
-            $('.items img[src]').prepOverlay({
-                subtype: 'image',
-                urlmatch: '/thumb$',
-                urlreplace: '/large'
+            //$(".thumbnails").scrollable();
+            //$('.items img[src].imgthumb').prepOverlay({
+            //    subtype: 'image',
+            //    urlmatch: '/thumb$',
+            //    urlreplace: '/large'
+            //});
+            $('#add_media').prepOverlay({
+                subtype: 'ajax',
+                filter: '#content>*',
+                formselector: 'form'
             });
-
         });
     </script>
 
+    </tal:media>
 
+    <tal:media condition="viewlet/newsmedia/hasContainer">
+        <tal:defs define="media context/media;
+                img_keys media/keys;
+                key_no   python: int(cols)-len(img_keys);
+                lines python: viewlet.imageRows(cols, img_keys);">
+    <a id="add_media" href="edit" tal:attributes="href string:$here_url/add_media">Editar medios</a>
+            
+    <div id="media-bar" tal:condition="lines">
+        <div class="navi prev" tal:condition="python: key_no < 0"></div>
+        <div class="thumbnails">
+            <div class="items">
+                <tal:lines repeat="line lines">
+                <tal:row repeat="item line">
+                <div class="mediawrap imgwrap" tal:define="isImg python: viewlet.is_image(item);">
+                    <img class="imgthumb" src="img" tal:condition="python: viewlet.is_image(item)" tal:attributes="src string:$here_url/media/$item/thumb;" />
+                    <a class="mediaplayer" href="video" style="display: block; height: 90px; width: 90px;" tal:condition="python: viewlet.is_video(item)" tal:attributes="href string:$here_url/media/$item;">
+                    </a>
+                </div>
+                </tal:row>
+                </tal:lines>
+            </div>
+
+            <br class="visualClear" clear="all" />
+        </div>
+        <div class="navi next" tal:condition="python: key_no < 0"></div>
+    </div>
+    <!-- overlay -->
+    <div id="box">
+
+        <!-- overlay scrollable -->
+        <div id="images">
+
+            <div class="items">
+                <tal:lines repeat="line lines">
+                    <tal:row repeat="item line">
+                    <div>
+                        <span><img class="imgthumb" src="img" tal:condition="python: viewlet.is_image(item)" tal:attributes="src string:$here_url/media/$item/large;" /></span>
+                        <span><a class="mediaplayer" href="video" style="display: block; height: 290px; width: 290px;" tal:condition="python: viewlet.is_video(item)" tal:attributes="href string:$here_url/media/$item;"><img class="videothumb" src=""/>&nbsp;</a></span>
+                    </div>
+                    </tal:row>
+                </tal:lines>
+
+                <br class="visualClear" clear="all" />
+            </div>
+        </div>
+
+        <!-- prev/next buttons -->
+        <div class="navi prev" tal:condition="python: key_no < 0"></div>
+        <div class="navi next" tal:condition="python: key_no < 0"></div>
+        <a class="close" href="#"> &nbsp; &nbsp; &nbsp; </a>
+    </div>
+ 
+    <script>
+        // execute your scripts when the DOM is ready. this is mostly a good habit
+        jQuery(function($) {
+
+            // initialize scrollable
+            $(".thumbnails").scrollable();
+            $('.items img[src].imgthumb').prepOverlay({
+                subtype: 'image',
+                urlmatch: '/thumb$',
+                urlreplace: '/large',
+            //        target: '#box',
+            });
+            $('a[href$=/add_media]#add_media').prepOverlay({
+                subtype: 'ajax',
+                filter: '#content>*',
+                formselector: 'form'
+            });
+
+            $("#images").scrollable();
+
+            //$(".thumbnails").scrollable({ circular: true, size: 3}).find("img").each(function(index) {
+            //    $(this).overlay({
+            //        effect: 'default',
+            //        target: '#box',
+            //        mask: { maskId: 'mask' },
+
+             //       onLoad: function() {
+             //           $("#images").data("scrollable").seekTo(index, 0);
+             //       }
+             //   });
+
+            flowplayer("a.mediaplayer", "./++resource++cienciasalud.newsmedia/flowplayer/flowplayer.swf", {
+                // change the default controlbar to modern
+                plugins: {
+                    controls: {
+                        url: "/%2B%2Bresource%2B%2Bcienciasalud.newsmedia/flowplayer/flowplayer.controls.swf",
+                        
+                        buttonColor: 'rgba(0, 0, 0, 0.9)',
+                        buttonOverColor: '#000000',
+                        backgroundColor: '#D7D7D7',
+                        backgroundGradient: 'medium',
+                        sliderColor: '#FFFFFF',
+                        
+                        sliderBorder: '1px solid #808080',
+                        volumeSliderColor: '#FFFFFF',
+                        volumeBorder: '1px solid #808080',
+                        
+                        timeColor: '#000000',
+                        durationColor: '#535353'
+                    }
+                },
+                clip: {
+                    autoPlay: false
+                }
+                
+            });
+
+        });
+
+
+    </script>
+
+    </tal:defs>
     </tal:media>
 </div>
             <div class="visualClear"></div>

@@ -1,2 +1,3 @@
 setuptools
 five.grok
+plone.app.jquerytools >= 1.2b4

@@ -1,11 +1,11 @@
 
 /* this makes it possible to add next button beside scrollable */
-.scrollable {
+.thumbnails {
 	float:left;	
 }
 
 /* prev, next, prevPage and nextPage buttons */
-a.browse {
+#media-bar a.browse {
 	background:url(/++resource++cienciasalud.newsmedia/images/hori_large.png) no-repeat;
 	display:block;
 	width:30px;
@@ -17,35 +17,34 @@ a.browse {
 }
 
 /* right */
-a.right { background-position: 0 -30px; clear:right; margin-right: 0px;}
-a.right:hover { background-position:-30px -30px; }
-a.right:active { background-position:-60px -30px; } 
+#media-bar a.right { background-position: 0 -30px; clear:right; margin-right: 0px;}
+#media-bar a.right:hover { background-position:-30px -30px; }
+#media-bar a.right:active { background-position:-60px -30px; } 
 
 
 /* left */
-a.left				{ margin-left: 0px; } 
-a.left:hover  		{ background-position:-30px 0; }
-a.left:active  	{ background-position:-60px 0; }
+#media-bar a.left { margin-left: 0px; }
+#media-bar a.left:hover { background-position:-30px 0; }
+#media-bar a.left:active   { background-position:-60px 0; }
 
 /* up and down */
-a.up, a.down		{ 
+#media-bar a.up, #media-bar a.down {
 	background:url(../img/scrollable/arrow/vert_large.png) no-repeat; 
 	float: none;
 	margin: 10px 50px;
 }
 
 /* up */
-a.up:hover  		{ background-position:-30px 0; }
-a.up:active  		{ background-position:-60px 0; }
+#media-bar a.up:hover { background-position:-30px 0; }
+#media-bar a.up:active { background-position:-60px 0; }
 
 /* down */
-a.down 				{ background-position: 0 -30px; }
-a.down:hover  		{ background-position:-30px -30px; }
-a.down:active  	{ background-position:-60px -30px; } 
+#media-bar a.down { background-position: 0 -30px; }
+#media-bar a.down:hover { background-position:-30px -30px; }
+#media-bar a.down:active { background-position:-60px -30px; } 
 
 
 /* disabled navigational button */
-a.disabled {
+#media-bar a.disabled {
 	visibility:hidden !important;		
 } 	
-

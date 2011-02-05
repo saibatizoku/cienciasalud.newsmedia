@@ -36,6 +36,8 @@ else:
 
 _marker = []
 
+video_mimetypes = ['video/mp4', 'video/x-flv']
+image_mimetypes = ['image/jpeg', 'image/gif', 'image/png']
 
 # GLOBAL CONTEXT INTERFACES IS IATNewsItem
 grok.context(IATNewsItem)
@@ -98,8 +100,6 @@ class MediaForNews(grok.Adapter):
 
     def __init__(self, context):
         self.context = context
-        if not self.hasContainer():
-            self.createContainer()
 
     def hasContainer(self):
         media = getattr(self.context, 'media', None)
@@ -119,6 +119,8 @@ class MediaForNews(grok.Adapter):
     def getMediaContainer(self):
         if self.hasContainer():
             return self.context.media
+        self.createContainer()
+        return getattr(self.context, 'media', None)
 
 # VIEWS
 class MediaContainerView(grok.View):
@@ -141,9 +143,6 @@ class AddFileForm(grok.AddForm):
 
     form_fields = grok.AutoFields(IImage).select('data')
 
-    def update(self):
-        self.newsmedia = IMediaContainer(self.context)
-
     def getContents(self):
         return self.context
 
@@ -158,14 +157,20 @@ class AddFileForm(grok.AddForm):
         if fileupload and fileupload.filename:
             contenttype = fileupload.headers.get('Content-Type')
             asciiname = filenamenormalizer.normalize(text=fileupload.filename, locale=self.request.locale.getLocaleID())
-            filename = INameChooser(self.newsmedia).chooseName(asciiname, None)
+            mediacontainer = IMediaContainer(self.context)
+            filename = INameChooser(mediacontainer).chooseName(asciiname, None)
             caption = filename
             #if not data['title']:
             #    caption = filename
             #else:
             #    caption = data['title']
-            file_ = MediaImage(filename, caption, data['data'], contenttype)
-            self.newsmedia[filename] = file_
+            if contenttype in video_mimetypes:
+                file_ = MediaVideo(filename, caption, data['data'], contenttype)
+            elif contenttype in image_mimetypes:
+                file_ = MediaImage(filename, caption, data['data'], contenttype)
+            else:
+                file_ = MediaFile(filename, caption, data['data'], contenttype)
+            mediacontainer[filename] = file_
 
 class DeleteMedia(grok.View):
     grok.require('zope2.DeleteObjects')
@@ -186,9 +191,18 @@ class EditImageForm(grok.EditForm):
 
     form_fields = grok.AutoFields(IImage)
 
+class BaseVideoView(grok.View):
+    grok.baseclass()
+    grok.context(MediaVideo)
+    grok.layer(INewsMediaLayer)
+    size = ()
+
+    def render(self):
+        return self.context.index_html(self.request, self.response)
+
 class BaseImageView(grok.View):
     grok.baseclass()
-    grok.context(IImage)
+    grok.context(MediaImage)
     grok.layer(INewsMediaLayer)
     size = ()
 
@@ -276,3 +290,10 @@ class BaseViewlet(grok.Viewlet):
             rows.append(this_row)
         return rows
 
+    def is_image(self, key):
+        media = self.newsmedia.getMediaContainer()
+        return isinstance(media[key], MediaImage)
+
+    def is_video(self, key):
+        media = self.newsmedia.getMediaContainer()
+        return isinstance(media[key], MediaVideo)

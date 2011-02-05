@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 import os
 
-version = '1.0'
+version = '1.1'
 
 setup(name='cienciasalud.newsmedia',
       version=version,
@@ -27,6 +27,7 @@ setup(name='cienciasalud.newsmedia',
           'setuptools',
           'five.grok',
           # -*- Extra requirements: -*-
+          'plone.app.jquerytools >= 1.2b4',
       ],
       entry_points="""
       # -*- Entry points: -*-

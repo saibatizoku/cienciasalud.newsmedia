@@ -2,7 +2,7 @@
 	root element for the scrollable.
 	when scrolling occurs this element stays still.
 */
-.scrollable {
+.thumbnails {
 	/* required settings */
 	position:relative;
 	overflow:hidden;
@@ -20,7 +20,7 @@
 	it's enough that you set the width and height for the root element and
 	not for this element.
 */
-.scrollable .items {
+.items {
 	/* this cannot be too large */
 	width:20000em;
 	position:absolute;
@@ -40,7 +40,7 @@
 }
 
 /* single scrollable item */
-#content .scrollable li {
+#content .thumbnails .mediawrap {
 	float:left;
     width: 90px;
     line-height: 90px;
@@ -54,15 +54,13 @@
 	-webkit-border-radius:4px;
 }
 
-#content .scrollable li img {
+#content .thumbnails .mediawrap img {
     vertical-align: middle;
 }
 
 /* active item */
-.scrollable .active {
+.thumbnails .active {
 	border:2px solid #000;
 	position:relative;
 	cursor:default;
 }
-
-
