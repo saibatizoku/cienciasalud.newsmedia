@@ -83,7 +83,7 @@
             <div class="imgblock" tal:condition="img_keys">
                 <ul class="imglist">
                     <tal:row repeat="key img_keys">
-                    <li><span class="imgwrap"><img src="img" tal:attributes="src string:$here_url/media/$key/mini;  alt python: media[key].title" /><a class="imgdel" href="delete" tal:attributes="href string:$here_url/deleteimage?$key">Eliminar imagen</a></span></li>
+                    <li><span class="imgwrap"><img src="img" tal:attributes="src string:$here_url/media/$key/mini;  alt python: media[key].title" /><a class="imgdel" href="delete" tal:attributes="href string:$here_url/deletemedia?$key">Eliminar imagen</a></span></li>
                     </tal:row>
                 </ul>
             </div>
