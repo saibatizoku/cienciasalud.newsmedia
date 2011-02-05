@@ -25,16 +25,30 @@
         id="++resource++cienciasalud.newsmedia/style.css"
         media="" rel="stylesheet" rendering="link"
         cacheable="True" compression="safe" cookable="True"
-        enabled="1" expression="" insert-after="ploneKss.css"/>
+        enabled="1" expression="" insert-after="ploneKss.css"
+        />
     <stylesheet
         id="++resource++cienciasalud.newsmedia/scrollable-horizontal.css"
         media="" rel="stylesheet" rendering="link"
         cacheable="True" compression="safe" cookable="True"
-        enabled="1" expression="" insert-after="++resource++cienciasalud.newsmedia/style.css"/>
+        enabled="1" expression="" insert-after="++resource++cienciasalud.newsmedia/style.css"
+        />
     <stylesheet
         id="++resource++cienciasalud.newsmedia/scrollable-button.css"
         media="" rel="stylesheet" rendering="link"
         cacheable="True" compression="safe" cookable="True"
-        enabled="1" expression="" insert-after="++resource++cienciasalud.newsmedia/scrollable-horizontal.css"/>
-
+        enabled="1" expression="" insert-after="++resource++cienciasalud.newsmedia/scrollable-horizontal.css"
+        />
+    <stylesheet
+        id="++resource++cienciasalud.newsmedia/flowplayer/css/flowplayer.css"
+        media="" rel="stylesheet" rendering="link"
+        cacheable="True" compression="safe" cookable="True"
+        enabled="1" expression=""
+        />
+    <stylesheet
+        id="++resource++cienciasalud.newsmedia/flowplayer/css/flowplayer-horizontal.css"
+        media="" rel="stylesheet" rendering="link"
+        cacheable="True" compression="safe" cookable="True"
+        enabled="1" expression=""
+        />
 </object>

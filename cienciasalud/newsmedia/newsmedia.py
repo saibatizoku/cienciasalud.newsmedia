@@ -14,15 +14,14 @@ from Acquisition import aq_parent
 from Products.ATContentTypes.interfaces import IATNewsItem
 
 from zope.interface import Interface
-from zope.interface.common import idatetime
 from zope.schema import BytesLine
 from zope.schema import Bytes
 from zope.schema import TextLine
 from zope.container.interfaces import INameChooser
 from plone.i18n.normalizer import filenamenormalizer
 
+from OFS.Image import File
 from OFS.Image import Image
-
 from cStringIO import StringIO
 
 try:
@@ -38,12 +37,20 @@ else:
 _marker = []
 
 
+# GLOBAL CONTEXT INTERFACES IS IATNewsItem
 grok.context(IATNewsItem)
 
+# INTERFACES
 class INewsMediaLayer(IDefaultBrowserLayer):
    """ Default Layer for News Media Items """
 
-class IImage(Interface):
+class INewsItemMedia(Interface):
+    """ Marker interface for news-item media. """
+
+class IMediaContainer(Interface):
+    """ Marker interface for a news-item media container. """
+
+class IFile(Interface):
     title = TextLine(
             title = u'Titulo de la imagen',
             default=u'',
@@ -59,19 +66,27 @@ class IImage(Interface):
             required=False,
             )
 
-class MediaImage(Image):
-    grok.implements(IImage)
+class IImage(IFile):
+    """ Marker Interface for Image files. """
 
-class IMediaContainer(Interface):
-    """ Marker interface for a news-item media container. """
+class IVideo(IFile):
+    """ Marker Interface for Video files. """
 
+# CONTENT-TYPES
 class NewsMediaContainer(Implicit, grok.Container):
     grok.implements(IMediaContainer)
     id = __name__ = 'media'
 
-class INewsItemMedia(Interface):
-    """ Marker interface for news-item media. """
+class MediaFile(File):
+    grok.implements(IFile)
 
+class MediaImage(Image):
+    grok.implements(IImage)
+
+class MediaVideo(File):
+    grok.implements(IVideo)
+
+# ADAPTERS
 @grok.adapter(IATNewsItem)
 @grok.implementer(IMediaContainer)
 def news_to_media(news_item):
@@ -105,6 +120,7 @@ class MediaForNews(grok.Adapter):
         if self.hasContainer():
             return self.context.media
 
+# VIEWS
 class MediaContainerView(grok.View):
     grok.context(IMediaContainer)
     grok.name('index')
@@ -118,7 +134,6 @@ class MediaContainerView(grok.View):
         return u''
 
 class AddFileForm(grok.AddForm):
-    grok.context(IATNewsItem)
     grok.name(u'add_media')
     grok.require('cmf.AddPortalContent')
     grok.layer(INewsMediaLayer)
@@ -152,17 +167,7 @@ class AddFileForm(grok.AddForm):
             file_ = MediaImage(filename, caption, data['data'], contenttype)
             self.newsmedia[filename] = file_
 
-class EditImageForm(grok.EditForm):
-    grok.context(IImage)
-    grok.name(u'edit')
-    grok.require('cmf.ModifyPortalContent')
-    grok.layer(INewsMediaLayer)
-    grok.template('default_edit_form')
-
-    form_fields = grok.AutoFields(IImage)
-
-class DeleteImage(grok.View):
-    grok.context(IATNewsItem)
+class DeleteMedia(grok.View):
     grok.require('zope2.DeleteObjects')
     grok.layer(INewsMediaLayer)
 
@@ -172,33 +177,18 @@ class DeleteImage(grok.View):
             del self.context['media'][filename]
             self.redirect(self.url(self.context, 'add_media'))
 
-class BaseViewlet(grok.Viewlet):
-    grok.viewletmanager(IAboveContentBody)
-    grok.template('baseviewlet')
-    grok.require('zope2.View')
+class EditImageForm(grok.EditForm):
+    grok.context(IImage)
+    grok.name(u'edit')
+    grok.require('cmf.ModifyPortalContent')
     grok.layer(INewsMediaLayer)
+    grok.template('default_edit_form')
 
-    def update(self):
-        newsmedia = INewsItemMedia(self.context)
-        self.newsmedia = newsmedia
-
-    def imageRows(self, cols, keys):
-        rows = []
-        if not cols or not keys:
-            return rows
-        rows_number = int(math.ceil(float(len(keys))/float(cols)))
-        for row in range(rows_number):
-            this_row = []
-            start = row*int(cols)
-            end = start + int(cols) 
-            for key in keys[start:end]:
-                this_row.append(key)
-            rows.append(this_row)
-        return rows
+    form_fields = grok.AutoFields(IImage)
 
 class BaseImageView(grok.View):
     grok.baseclass()
-    grok.context(Image)
+    grok.context(IImage)
     grok.layer(INewsMediaLayer)
     size = ()
 
@@ -260,3 +250,29 @@ class ImageMiniView(BaseImageView):
     grok.name('mini')
     grok.require('zope2.View')
     size = (192, 192)
+
+# VIEWLETS
+class BaseViewlet(grok.Viewlet):
+    grok.viewletmanager(IAboveContentBody)
+    grok.template('baseviewlet')
+    grok.require('zope2.View')
+    grok.layer(INewsMediaLayer)
+
+    def update(self):
+        newsmedia = INewsItemMedia(self.context)
+        self.newsmedia = newsmedia
+
+    def imageRows(self, cols, keys):
+        rows = []
+        if not cols or not keys:
+            return rows
+        rows_number = int(math.ceil(float(len(keys))/float(cols)))
+        for row in range(rows_number):
+            this_row = []
+            start = row*int(cols)
+            end = start + int(cols) 
+            for key in keys[start:end]:
+                this_row.append(key)
+            rows.append(this_row)
+        return rows
+
