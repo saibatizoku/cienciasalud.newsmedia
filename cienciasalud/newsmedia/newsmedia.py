@@ -122,9 +122,9 @@ class AddFileForm(grok.AddForm):
     grok.name(u'add_media')
     grok.require('cmf.AddPortalContent')
     grok.layer(INewsMediaLayer)
+    grok.template('default_edit_form')
 
     form_fields = grok.AutoFields(IImage).select('data')
-    template = grok.PageTemplateFile('newsmedia_templates/default_edit_form.pt')
 
     def update(self):
         self.newsmedia = IMediaContainer(self.context)
@@ -157,9 +157,9 @@ class EditImageForm(grok.EditForm):
     grok.name(u'edit')
     grok.require('cmf.ModifyPortalContent')
     grok.layer(INewsMediaLayer)
+    grok.template('default_edit_form')
 
     form_fields = grok.AutoFields(IImage)
-    template = grok.PageTemplateFile('newsmedia_templates/default_edit_form.pt')
 
 class DeleteImage(grok.View):
     grok.context(IATNewsItem)
