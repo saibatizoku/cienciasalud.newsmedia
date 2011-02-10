@@ -13,6 +13,7 @@ from Acquisition import aq_inner
 from Acquisition import aq_parent
 from Products.ATContentTypes.interfaces import IATNewsItem
 
+from zope.component import getMultiAdapter
 from zope.interface import Interface
 from zope.schema import BytesLine
 from zope.schema import Bytes
@@ -139,7 +140,7 @@ class AddFileForm(grok.AddForm):
     grok.name(u'add_media')
     grok.require('cmf.AddPortalContent')
     grok.layer(INewsMediaLayer)
-    grok.template('default_edit_form')
+    #grok.template('default_edit_form')
 
     form_fields = grok.AutoFields(IImage).select('data')
 
@@ -266,6 +267,25 @@ class ImageMiniView(BaseImageView):
     size = (192, 192)
 
 # VIEWLETS
+class MediaViewletManager(grok.ViewletManager):
+    grok.name('newsitem.media')
+    grok.require('zope2.View')
+
+class AddMediaViewlet(grok.Viewlet):
+    grok.viewletmanager(MediaViewletManager)
+    grok.require('zope2.View')
+    grok.layer(INewsMediaLayer)
+
+    def update(self):
+        self.form = getMultiAdapter((self.context, self.request), name='add_media')
+        self.form.update_form()
+        if self.request.method == 'POST':
+            app = grok.get_application(self.context)
+            self.__parent__.redirect(self.__parent__.url(obj=app))
+
+    def render(self):
+        return self.form.render()
+
 class BaseViewlet(grok.Viewlet):
     grok.viewletmanager(IAboveContentBody)
     grok.template('baseviewlet')
