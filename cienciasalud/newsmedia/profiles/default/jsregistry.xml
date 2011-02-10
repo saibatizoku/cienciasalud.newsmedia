@@ -6,4 +6,10 @@
  <javascript cacheable="True" compression="none" cookable="True"
     enabled="True" expression=""
     id="++resource++cienciasalud.newsmedia/flowplayer/flowplayer.playlist.min.js" inline="False"/>
+ <javascript authenticated="False" cacheable="True" compression="none"
+    conditionalcomment="" cookable="True" enabled="True" expression=""
+    id="++resource++plone.app.jquerytools.plugins.js" inline="False"/>
+ <javascript authenticated="False" cacheable="True" compression="none"
+    conditionalcomment="" cookable="True" enabled="True" expression=""
+    id="++resource++plone.app.jquerytools.validator.js" inline="False"/>
 </object>
