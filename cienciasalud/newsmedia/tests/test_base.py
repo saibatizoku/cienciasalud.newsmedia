@@ -1,12 +1,13 @@
 import unittest
 
-#from zope.testing import doctestunit
-#from zope.component import testing
+from zope.testing import doctestunit
+from zope.component import testing
 from Testing import ZopeTestCase as ztc
 
 from Products.Five import fiveconfigure
 from Products.PloneTestCase import PloneTestCase as ptc
 from Products.PloneTestCase.layer import PloneSite
+
 ptc.setupPloneSite()
 
 import cienciasalud.newsmedia
@@ -19,7 +20,9 @@ class TestCase(ptc.PloneTestCase):
         @classmethod
         def setUp(cls):
             fiveconfigure.debug_mode = True
-            ztc.installPackage(cienciasalud.newsmedia)
+            ztc.installPackage('five.grok')
+            ztc.installPackage('plone.app.jquerytools')
+            ztc.installPackage('cienciasalud.newsmedia')
             fiveconfigure.debug_mode = False
 
         @classmethod
@@ -41,13 +44,13 @@ def test_suite():
 
 
         # Integration tests that use PloneTestCase
-        #ztc.ZopeDocFileSuite(
-        #    'README.txt', package='cienciasalud.newsmedia',
-        #    test_class=TestCase),
+        ztc.ZopeDocFileSuite(
+            'README.txt', package='cienciasalud.newsmedia',
+            test_class=TestCase),
 
-        #ztc.FunctionalDocFileSuite(
-        #    'browser.txt', package='cienciasalud.newsmedia',
-        #    test_class=TestCase),
+        ztc.FunctionalDocFileSuite(
+            'browser.txt', package='cienciasalud.newsmedia',
+            test_class=TestCase),
 
         ])
 

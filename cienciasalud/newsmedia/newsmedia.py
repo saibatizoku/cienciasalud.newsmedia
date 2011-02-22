@@ -47,7 +47,7 @@ grok.context(IATNewsItem)
 class INewsMediaLayer(IDefaultBrowserLayer):
    """ Default Layer for News Media Items """
 
-class INewsItemMedia(Interface):
+class IMediaManager(Interface):
     """ Marker interface for news-item media. """
 
 class IMediaContainer(Interface):
@@ -93,10 +93,12 @@ class MediaVideo(File):
 @grok.adapter(IATNewsItem)
 @grok.implementer(IMediaContainer)
 def news_to_media(news_item):
-    return INewsItemMedia(news_item).getMediaContainer()
+    if IMediaManager(news_item).hasContainer():
+        return IMediaManager(news_item).getMediaContainer()
+    return False
 
-class MediaForNews(grok.Adapter):
-    grok.provides(INewsItemMedia)
+class MediaManager(grok.Adapter):
+    grok.provides(IMediaManager)
     grok.context(IATNewsItem)
 
     def __init__(self, context):
@@ -107,10 +109,11 @@ class MediaForNews(grok.Adapter):
         return media is not None
 
     def createContainer(self):
-        media = getattr(self.context, 'media', None)
-        if media is None:
+        if not 'media' in self.context.__dict__:
             media = NewsMediaContainer()
-            setattr(self.context, 'media', media)
+            self.context.__dict__['media'] = media
+            return True
+        return
 
     def getContents(self):
         if not self.hasContainer():
@@ -120,8 +123,7 @@ class MediaForNews(grok.Adapter):
     def getMediaContainer(self):
         if self.hasContainer():
             return self.context.media
-        self.createContainer()
-        return getattr(self.context, 'media', None)
+        return
 
 # VIEWS
 class MediaContainerView(grok.View):
@@ -293,7 +295,7 @@ class BaseViewlet(grok.Viewlet):
     grok.layer(INewsMediaLayer)
 
     def update(self):
-        newsmedia = INewsItemMedia(self.context)
+        newsmedia = IMediaManager(self.context)
         self.newsmedia = newsmedia
 
     def imageRows(self, cols, keys):
