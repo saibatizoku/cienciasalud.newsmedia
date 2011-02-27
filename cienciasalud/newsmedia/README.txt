@@ -70,11 +70,11 @@ our media container.
     
     We can also edit the caption and the file data through our "zpt" image.
 
-    >>> zpt.manage_edit(title="Empty ZPT Logo", content_type='', filedata='')
-    >>> zpt.get_size() is 0 and zpt.title is "Empty ZPT Logo"
+    >>> zpt.manage_edit(title='', content_type='', filedata='')
+    >>> zpt.get_size() is 0 and zpt.title is ''
     True
-    >>> zpt.getContentType()
-    ''
+    >>> zpt.getContentType() is ''
+    True
     >>> zpt.manage_upload(zptlogo)
     >>> zpt.get_size()
     341
