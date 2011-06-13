@@ -27,6 +27,7 @@ setup(name='cienciasalud.newsmedia',
           'setuptools',
           'five.grok',
           # -*- Extra requirements: -*-
+          'PIL',
           'plone.app.jquerytools >= 1.2b4',
       ],
       entry_points="""

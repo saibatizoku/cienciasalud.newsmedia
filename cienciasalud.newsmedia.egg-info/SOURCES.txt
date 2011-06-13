@@ -13,4 +13,6 @@ cienciasalud.newsmedia.egg-info/requires.txt
 cienciasalud.newsmedia.egg-info/top_level.txt
 cienciasalud/newsmedia/__init__.py
 cienciasalud/newsmedia/newsmedia.py
-cienciasalud/newsmedia/tests.py
+cienciasalud/newsmedia/setuphandlers.py
+cienciasalud/newsmedia/tests/__init__.py
+cienciasalud/newsmedia/tests/test_base.py

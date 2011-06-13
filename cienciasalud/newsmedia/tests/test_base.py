@@ -28,7 +28,7 @@ zptlogo = (
             '\x00A\x00;'
             )
 
-
+import PIL
 ptc.setupPloneSite()
 
 import cienciasalud.newsmedia
