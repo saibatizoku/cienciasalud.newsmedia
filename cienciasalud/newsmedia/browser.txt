@@ -11,42 +11,45 @@ object.
 - self.setRoles(['Manager', 'Member']) adjusts the roles of the current user
 ####### FIXME
 
+INSTALLATION
+============
+
+Our product should be installable through our portal's quickinstaller.
+
     >>> qi = self.portal.portal_quickinstaller
-    >>> qi.isProductInstallable('cienciasalud.newsmedia')
-    True
-    >>> qi.installProduct('cienciasalud.newsmedia')
-    ''
+    >>> self.addProduct('cienciasalud.newsmedia')
     >>> qi.isProductInstalled('cienciasalud.newsmedia')
     True
 
-First, we create a News Item called 'news-1' and store it in our user's folder.
-We use Plone's content-type factory to create 'news-1', and we set a title and
-description.
+WORKING WITH NEWS ITEMS IN THE BROWSER
+======================================
 
-    >>> self.folder.invokeFactory('News Item', 'news-1')
-    'news-1'
-    >>> 'news-1' in self.folder
-    True
-    >>> news1 = self.folder['news-1']
-    >>> news1.setTitle(u'Lorem ipsum news')
-    >>> news1.setDescription(u'Donec bibendum gravida sapien, quis gravida quam laoreet vitae.')
+First, we use our test browser to login as the portal manager, then create
+a News Item, and store it in the root of our portal.
 
-Now that we have our News Item created and stored, we check if our news item has
-a media container. It shouldn't.
+    >>> from Products.Five.testbrowser import Browser
+    >>> from Products.PloneTestCase.setup import portal_owner, default_password
+    >>> self.browser = Browser()
 
-    >>> from cienciasalud.newsmedia.newsmedia import IMediaContainer, IMediaManager
-    >>> IMediaManager(news1).hasContainer() is False
-    True
-    >>> IMediaContainer(news1) is False
-    True
-
-    >>> IMediaManager(news1).createContainer()
-    True
-    >>> IMediaManager(news1).hasContainer() is True
+    >>> portal_url = self.portal.absolute_url()
+    >>> self.browser.open(portal_url)
+    >>> self.browser.getLink('Log in').click()
+    >>> self.browser.getControl(name='__ac_name').value = portal_owner
+    >>> self.browser.getControl(name='__ac_password').value = default_password
+    >>> self.browser.getControl(name='submit').click()
+    >>> self.browser.open(portal_url)
+    >>> self.browser.getLink(id='news-item').click()
+    >>> self.browser.getControl(name='title').value = u'Lorem ipsum news'
+    >>> self.browser.getControl(name='description').value = u'Donec bibendum gravida sapien, quis gravida quam laoreet vitae.'
+    >>> self.browser.getControl(name='form.button.save').click()
+    >>> u'lorem-ipsum-news' in self.portal
     True
 
-The next thing that we will do is to add an image file named "zptlogo.gif" into
-our media container.
+    >>> news_url = self.portal['lorem-ipsum-news'].absolute_url()
+    >>> self.browser.open(news_url)
+
+Once we have our news item created, we add a sample image to our 'media' folder.
+
     >>> zptlogo = (
     ...     'GIF89a\x10\x00\x10\x00\xd5\x00\x00\xff\xff\xff\xff\xff\xfe\xfc\xfd\xfd'
     ...     '\xfa\xfb\xfc\xf7\xf9\xfa\xf5\xf8\xf9\xf3\xf6\xf8\xf2\xf5\xf7\xf0\xf4\xf6'
@@ -67,40 +70,8 @@ our media container.
     ...     '\x00A\x00;'
     ...     )
     ...
-    >>> from cienciasalud.newsmedia.newsmedia import MediaImage
-    >>> zptimg = MediaImage(id='zptlogo.gif', title='Zope2 Logo', file=zptlogo, content_type='image/gif')
-    >>> media = IMediaContainer(news1)
-    >>> media[zptimg.id()] = zptimg
-    >>> list(media)
-    ['zptlogo.gif']
-    >>> zpt = media['zptlogo.gif']
-    >>> zpt.__dict__['data'] is str(zptlogo)
-    True
-
-    >>> from Products.Five.testbrowser import Browser
-    >>> self.browser = Browser()
-    >>> folder_url = self.folder.absolute_url()
-    >>> news_url = self.folder['news-1'].absolute_url()
-    >>> self.browser.open(news_url)  #self.browser.open(folder_url)
-    >>> from Products.PloneTestCase.setup import portal_owner, default_password
-
-
-    Now we login:
-    >>> self.browser.getControl(name='__ac_name').value = portal_owner
-    >>> self.browser.getControl(name='__ac_password').value = default_password
-    >>> self.browser.getControl(name='submit').click()
-    >>> self.browser.getLink(id="add_media").click()
-    >>> self.browser.url
-    'http://nohost/plone/Members/test_user_1_/news-1/add_media'
-    >>> 'zptlogo.gif' in self.browser.contents
-    True
-    >>> self.browser.getLink(id="img-del").click()
-    >>> self.browser.url
-    'http://nohost/plone/Members/test_user_1_/news-1/add_media'
-
-    We now add our zpt logo via the upload button on the page:
-    >>> from cienciasalud.newsmedia.tests.test_base import zptlogo
-    >>> zptfile = open("zptlogo.gif", "wb")
-    >>> zptfile.write(zptlogo)
-    >>> self.browser.getControl(name="form.data").value = zptfile
-    >>> zptfile.close()
+    >>> import cStringIO
+    >>> zptfile = cStringIO.StringIO(zptlogo)
+    >>> self.browser.getLink(id='add_media').click()
+    >>> self.browser.getControl(name='form.data').add_file(zptfile, 'image/gif', 'zpt.gif')
+    >>> self.browser.getControl(name='form.actions.upload').click()
