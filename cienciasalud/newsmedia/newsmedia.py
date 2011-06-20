@@ -43,19 +43,23 @@ image_mimetypes = ['image/jpeg', 'image/gif', 'image/png']
 # GLOBAL CONTEXT INTERFACES IS IATNewsItem
 grok.context(IATNewsItem)
 
+
 # INTERFACES
 class INewsMediaLayer(IDefaultBrowserLayer):
-   """ Default Layer for News Media Items """
+    """ Default Layer for News Media Items """
+
 
 class IMediaManager(Interface):
     """ Marker interface for news-item media. """
 
+
 class IMediaContainer(Interface):
     """ Marker interface for a news-item media container. """
 
+
 class IFile(Interface):
     title = TextLine(
-            title = u'Titulo de la imagen',
+            title=u'Titulo de la imagen',
             default=u'',
             missing_value=u'',
             required=False,
@@ -69,25 +73,32 @@ class IFile(Interface):
             required=False,
             )
 
+
 class IImage(IFile):
     """ Marker Interface for Image files. """
 
+
 class IVideo(IFile):
     """ Marker Interface for Video files. """
+
 
 # CONTENT-TYPES
 class NewsMediaContainer(Implicit, grok.Container):
     grok.implements(IMediaContainer)
     id = __name__ = 'media'
 
+
 class MediaFile(File):
     grok.implements(IFile)
+
 
 class MediaImage(Image):
     grok.implements(IImage)
 
+
 class MediaVideo(File):
     grok.implements(IVideo)
+
 
 # ADAPTERS
 @grok.adapter(IATNewsItem)
@@ -96,6 +107,7 @@ def news_to_media(news_item):
     if IMediaManager(news_item).hasContainer():
         return IMediaManager(news_item).getMediaContainer()
     return False
+
 
 class MediaManager(grok.Adapter):
     grok.provides(IMediaManager)
@@ -125,6 +137,7 @@ class MediaManager(grok.Adapter):
             return self.context.media
         return
 
+
 # VIEWS
 class MediaContainerView(grok.View):
     grok.context(IMediaContainer)
@@ -138,6 +151,7 @@ class MediaContainerView(grok.View):
     def render(self):
         return u''
 
+
 class AddFileForm(grok.AddForm):
     grok.name(u'add_media')
     grok.require('cmf.AddPortalContent')
@@ -149,17 +163,18 @@ class AddFileForm(grok.AddForm):
     def getContents(self):
         return self.context
 
-    @grok.action(u'Subir archivo')
+    @grok.action(u'Subir archivo', name='upload')
     def add(self, **data):
         if len(data['data']) > 0:
             self.upload(**data)
-        self.redirect(self.url(self.context)+'/add_media')
+        self.redirect(self.url(self.context) + '/add_media')
 
     def upload(self, **data):
         fileupload = self.request['form.data']
         if fileupload and fileupload.filename:
             contenttype = fileupload.headers.get('Content-Type')
-            asciiname = filenamenormalizer.normalize(text=fileupload.filename, locale=self.request.locale.getLocaleID())
+            asciiname = filenamenormalizer.normalize(text=fileupload.filename,
+                                    locale=self.request.locale.getLocaleID())
             mediacontainer = IMediaContainer(self.context)
             filename = INameChooser(mediacontainer).chooseName(asciiname, None)
             caption = filename
@@ -168,12 +183,22 @@ class AddFileForm(grok.AddForm):
             #else:
             #    caption = data['title']
             if contenttype in video_mimetypes:
-                file_ = MediaVideo(filename, caption, data['data'], contenttype)
+                file_ = MediaVideo(filename,
+                                   caption,
+                                   data['data'],
+                                   contenttype)
             elif contenttype in image_mimetypes:
-                file_ = MediaImage(filename, caption, data['data'], contenttype)
+                file_ = MediaImage(filename,
+                                   caption,
+                                   data['data'],
+                                   contenttype)
             else:
-                file_ = MediaFile(filename, caption, data['data'], contenttype)
+                file_ = MediaFile(filename,
+                                  caption,
+                                  data['data'],
+                                  contenttype)
             mediacontainer[filename] = file_
+
 
 class DeleteMedia(grok.View):
     grok.require('zope2.DeleteObjects')
@@ -185,6 +210,7 @@ class DeleteMedia(grok.View):
             del self.context['media'][filename]
             self.redirect(self.url(self.context, 'add_media'))
 
+
 class EditImageForm(grok.EditForm):
     grok.context(IImage)
     grok.name(u'edit')
@@ -194,6 +220,7 @@ class EditImageForm(grok.EditForm):
 
     form_fields = grok.AutoFields(IImage)
 
+
 class BaseVideoView(grok.View):
     grok.baseclass()
     grok.context(MediaVideo)
@@ -202,6 +229,7 @@ class BaseVideoView(grok.View):
 
     def render(self):
         return self.context.index_html(self.request, self.response)
+
 
 class BaseImageView(grok.View):
     grok.baseclass()
@@ -222,13 +250,13 @@ class BaseImageView(grok.View):
         mimetype = 'image/%s' % format.lower()
         return MediaImage(id, title, file, mimetype)
 
-    def scale(self, w, h, default_format = 'PNG'):
+    def scale(self, w, h, default_format='PNG'):
         """ scale image (with material from ImageTag_Hotfix)"""
         #make sure we have valid int's
         size = int(w), int(h)
         data = str(self.context.data)
 
-        original_file=StringIO(data)
+        original_file = StringIO(data)
         image = PIL.Image.open(original_file)
         # consider image mode when scaling
         # source images can be mode '1','L,','P','RGB(A)'
@@ -253,25 +281,30 @@ class BaseImageView(grok.View):
         thumbnail_file.seek(0)
         return thumbnail_file, format.lower()
 
+
 class ImageThumbView(BaseImageView):
     grok.name('thumb')
     grok.require('zope2.View')
     size = (90, 90)
+
 
 class ImageLargeView(BaseImageView):
     grok.name('large')
     grok.require('zope2.View')
     size = (768, 768)
 
+
 class ImageMiniView(BaseImageView):
     grok.name('mini')
     grok.require('zope2.View')
     size = (192, 192)
 
+
 # VIEWLETS
 class MediaViewletManager(grok.ViewletManager):
     grok.name('newsitem.media')
     grok.require('zope2.View')
+
 
 class AddMediaViewlet(grok.Viewlet):
     grok.viewletmanager(MediaViewletManager)
@@ -279,7 +312,8 @@ class AddMediaViewlet(grok.Viewlet):
     grok.layer(INewsMediaLayer)
 
     def update(self):
-        self.form = getMultiAdapter((self.context, self.request), name='add_media')
+        self.form = getMultiAdapter((self.context, self.request),
+                                     name='add_media')
         self.form.update_form()
         if self.request.method == 'POST':
             app = grok.get_application(self.context)
@@ -287,6 +321,7 @@ class AddMediaViewlet(grok.Viewlet):
 
     def render(self):
         return self.form.render()
+
 
 class BaseViewlet(grok.Viewlet):
     grok.viewletmanager(IAboveContentBody)
@@ -302,11 +337,11 @@ class BaseViewlet(grok.Viewlet):
         rows = []
         if not cols or not keys:
             return rows
-        rows_number = int(math.ceil(float(len(keys))/float(cols)))
+        rows_number = int(math.ceil(float(len(keys)) / float(cols)))
         for row in range(rows_number):
             this_row = []
-            start = row*int(cols)
-            end = start + int(cols) 
+            start = row * int(cols)
+            end = start + int(cols)
             for key in keys[start:end]:
                 this_row.append(key)
             rows.append(this_row)
