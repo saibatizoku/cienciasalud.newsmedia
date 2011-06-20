@@ -2,28 +2,30 @@ import datetime
 import pytz
 import urllib
 import math
+from cStringIO import StringIO
 
 from five import grok
-from zope.publisher.interfaces.browser import IDefaultBrowserLayer
-from plone.app.layout.viewlets.interfaces import IAboveContentBody
-#from Products.Five.browser.pagetemplatefile import ZopeTwoPageTemplateFile
 
+from OFS.Image import File
+from OFS.Image import Image
 from Acquisition import Implicit
 from Acquisition import aq_inner
 from Acquisition import aq_parent
-from Products.ATContentTypes.interfaces import IATNewsItem
 
 from zope.component import getMultiAdapter
+from zope.component import getUtility
 from zope.interface import Interface
 from zope.schema import BytesLine
 from zope.schema import Bytes
 from zope.schema import TextLine
-from zope.container.interfaces import INameChooser
-from plone.i18n.normalizer import filenamenormalizer
+from zope.app.container.interfaces import INameChooser
+from zope.app.container.contained import NameChooser
+from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 
-from OFS.Image import File
-from OFS.Image import Image
-from cStringIO import StringIO
+from plone.i18n.normalizer.interfaces import IFileNameNormalizer
+from plone.app.layout.viewlets.interfaces import IAboveContentBody
+from Products.ATContentTypes.interfaces import IATNewsItem
+
 
 try:
     import PIL.Image
@@ -138,6 +140,11 @@ class MediaManager(grok.Adapter):
         return
 
 
+class MediaNameChooser(grok.Adapter, NameChooser):
+    grok.context(IMediaContainer)
+    grok.implements(INameChooser)
+
+
 # VIEWS
 class MediaContainerView(grok.View):
     grok.context(IMediaContainer)
@@ -163,6 +170,10 @@ class AddFileForm(grok.AddForm):
     def getContents(self):
         return self.context
 
+    def get_locale(self):
+        if self.request.locale.getLocaleID():
+            return self.request.locale.getLocaleID()
+
     @grok.action(u'Subir archivo', name='upload')
     def add(self, **data):
         if len(data['data']) > 0:
@@ -173,8 +184,9 @@ class AddFileForm(grok.AddForm):
         fileupload = self.request['form.data']
         if fileupload and fileupload.filename:
             contenttype = fileupload.headers.get('Content-Type')
-            asciiname = filenamenormalizer.normalize(text=fileupload.filename,
-                                    locale=self.request.locale.getLocaleID())
+            util = getUtility(IFileNameNormalizer)
+            asciiname = util.normalize(text=fileupload.filename,
+                             locale=self.get_locale())
             mediacontainer = IMediaContainer(self.context)
             filename = INameChooser(mediacontainer).chooseName(asciiname, None)
             caption = filename

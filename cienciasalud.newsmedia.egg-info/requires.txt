@@ -1,4 +1,0 @@
-setuptools
-five.grok
-PIL
-plone.app.jquerytools >= 1.2b4

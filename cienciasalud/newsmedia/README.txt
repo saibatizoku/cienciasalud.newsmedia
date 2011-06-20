@@ -58,25 +58,16 @@ our media container.
     ...     '\x00A\x00;'
     ...     )
     ...
-    >>> from cienciasalud.newsmedia.newsmedia import MediaImage
-    >>> zptimg = MediaImage(id='zptlogo.gif', title='Zope2 Logo', file=zptlogo, content_type='image/gif')
-    >>> media = IMediaContainer(news1)
-    >>> media[zptimg.id()] = zptimg
-    >>> list(media)
-    ['zptlogo.gif']
-    >>> zpt = media['zptlogo.gif']
-    >>> zpt.__dict__['data'] is str(zptlogo)
-    True
-    
-    We can also edit the caption and the file data through our "zpt" image.
-
-    >>> zpt.manage_edit(title='', content_type='', filedata='')
-    >>> zpt.get_size() is 0 and zpt.title is ''
-    True
-    >>> zpt.getContentType() is ''
-    True
-    >>> zpt.manage_upload(zptlogo)
-    >>> zpt.get_size()
-    341
-    >>> zpt.getContentType()
-    'image/gif'
+    >>> import cStringIO
+    >>> zptfile = cStringIO.StringIO(zptlogo)
+    >>> from zope.publisher.browser import TestRequest
+    >>> from cienciasalud.newsmedia.newsmedia import AddFileForm
+    >>> class filestub(object):
+    ...     def __init__(self, file, name, headers):
+    ...         self.file = file
+    ...         self.filename = name
+    ...         self.headers = headers
+    >>> zptdata = filestub(zptfile, 'zpt.gif', {'Content-Type': 'text/x-dummy'})
+    >>> request = TestRequest(form={'form.data': zptdata})
+    >>> addmediaview = AddFileForm(news1, request)
+    >>> addmediaview.upload(data=zptfile)
