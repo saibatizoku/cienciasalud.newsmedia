@@ -28,11 +28,8 @@ a media container. It shouldn't.
     >>> from cienciasalud.newsmedia.newsmedia import IMediaContainer, IMediaManager
     >>> IMediaManager(news1).hasContainer() is False
     True
-    >>> IMediaContainer(news1) is False
-    True
-
-    >>> IMediaManager(news1).createContainer()
-    True
+    >>> IMediaContainer(news1)
+    <NewsMediaContainer at /.../news-1/media>
     >>> IMediaManager(news1).hasContainer() is True
     True
 
@@ -71,3 +68,5 @@ our media container.
     >>> request = TestRequest(form={'form.data': zptdata})
     >>> addmediaview = AddFileForm(news1, request)
     >>> addmediaview.upload(data=zptfile)
+    >>> 'zpt.gif' in news1.media
+    True

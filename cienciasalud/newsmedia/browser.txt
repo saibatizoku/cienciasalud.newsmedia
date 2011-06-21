@@ -27,7 +27,7 @@ WORKING WITH NEWS ITEMS IN THE BROWSER
 First, we use our test browser to login as the portal manager, then create
 a News Item, and store it in the root of our portal.
 
-    >>> from Products.Five.testbrowser import Browser
+    >>> from Testing.testbrowser import Browser
     >>> from Products.PloneTestCase.setup import portal_owner, default_password
     >>> self.browser = Browser()
 
@@ -75,3 +75,7 @@ Once we have our news item created, we add a sample image to our 'media' folder.
     >>> self.browser.getLink(id='add_media').click()
     >>> self.browser.getControl(name='form.data').add_file(zptfile, 'image/gif', 'zpt.gif')
     >>> self.browser.getControl(name='form.actions.upload').click()
+    >>> 'zpt.gif' in self.portal['lorem-ipsum-news']['media']
+    True
+    >>> self.portal['lorem-ipsum-news']['media']['zpt.gif'].getSize()
+    341

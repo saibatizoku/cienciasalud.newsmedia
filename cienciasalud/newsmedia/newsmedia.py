@@ -14,6 +14,7 @@ from Acquisition import aq_parent
 
 from zope.component import getMultiAdapter
 from zope.component import getUtility
+from zope.component.factory import Factory
 from zope.interface import Interface
 from zope.schema import BytesLine
 from zope.schema import Bytes
@@ -23,6 +24,7 @@ from zope.app.container.contained import NameChooser
 from zope.publisher.interfaces.browser import IDefaultBrowserLayer
 
 from plone.i18n.normalizer.interfaces import IFileNameNormalizer
+from plone.app.content import container
 from plone.app.layout.viewlets.interfaces import IAboveContentBody
 from Products.ATContentTypes.interfaces import IATNewsItem
 
@@ -85,10 +87,13 @@ class IVideo(IFile):
 
 
 # CONTENT-TYPES
-class NewsMediaContainer(Implicit, grok.Container):
+class NewsMediaContainer(container.Container):
     grok.implements(IMediaContainer)
-    id = __name__ = 'media'
+    portal_type = "News Media Folder"
+    title = u""
+    description = u""
 
+mediaFactory = Factory(NewsMediaContainer)
 
 class MediaFile(File):
     grok.implements(IFile)
@@ -108,6 +113,8 @@ class MediaVideo(File):
 def news_to_media(news_item):
     if IMediaManager(news_item).hasContainer():
         return IMediaManager(news_item).getMediaContainer()
+    if IMediaManager(news_item).createContainer():
+        return IMediaManager(news_item).getMediaContainer()
     return False
 
 
@@ -124,7 +131,7 @@ class MediaManager(grok.Adapter):
 
     def createContainer(self):
         if not 'media' in self.context.__dict__:
-            media = NewsMediaContainer()
+            media = mediaFactory("media")
             self.context.__dict__['media'] = media
             return True
         return
@@ -178,7 +185,7 @@ class AddFileForm(grok.AddForm):
     def add(self, **data):
         if len(data['data']) > 0:
             self.upload(**data)
-        self.redirect(self.url(self.context) + '/add_media')
+        #self.redirect(self.url())
 
     def upload(self, **data):
         fileupload = self.request['form.data']
@@ -328,8 +335,8 @@ class AddMediaViewlet(grok.Viewlet):
                                      name='add_media')
         self.form.update_form()
         if self.request.method == 'POST':
-            app = grok.get_application(self.context)
-            self.__parent__.redirect(self.__parent__.url(obj=app))
+            #app = grok.getApplication()
+            #self.view.redirect(pps.portal_url)
 
     def render(self):
         return self.form.render()
