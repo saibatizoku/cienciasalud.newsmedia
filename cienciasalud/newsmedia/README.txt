@@ -55,8 +55,8 @@ our media container.
     ...     '\x00A\x00;'
     ...     )
     ...
-    >>> import cStringIO
-    >>> zptfile = cStringIO.StringIO(zptlogo)
+    >>> import StringIO
+    >>> zptfile = StringIO.StringIO(zptlogo)
     >>> from zope.publisher.browser import TestRequest
     >>> from cienciasalud.newsmedia.newsmedia import AddFileForm
     >>> class filestub(object):
@@ -64,7 +64,7 @@ our media container.
     ...         self.file = file
     ...         self.filename = name
     ...         self.headers = headers
-    >>> zptdata = filestub(zptfile, 'zpt.gif', {'Content-Type': 'text/x-dummy'})
+    >>> zptdata = filestub(zptfile, 'zpt.gif', {'Content-Type': 'image/gif'})
     >>> request = TestRequest(form={'form.data': zptdata})
     >>> addmediaview = AddFileForm(news1, request)
     >>> addmediaview.upload(data=zptfile)

@@ -70,12 +70,12 @@ Once we have our news item created, we add a sample image to our 'media' folder.
     ...     '\x00A\x00;'
     ...     )
     ...
-    >>> import cStringIO
-    >>> zptfile = cStringIO.StringIO(zptlogo)
+    >>> import StringIO
+    >>> zptfile = StringIO.StringIO(zptlogo)
     >>> self.browser.getLink(id='add_media').click()
     >>> self.browser.getControl(name='form.data').add_file(zptfile, 'image/gif', 'zpt.gif')
     >>> self.browser.getControl(name='form.actions.upload').click()
     >>> 'zpt.gif' in self.portal['lorem-ipsum-news']['media']
     True
     >>> self.portal['lorem-ipsum-news']['media']['zpt.gif'].getSize()
-    341
+    (16, 16)

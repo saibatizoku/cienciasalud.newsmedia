@@ -160,7 +160,7 @@ class MediaContainerView(grok.View):
     grok.layer(INewsMediaLayer)
 
     def update(self):
-        self.redirect(self.url(self.context.__parent__))
+        self.request.response.redirect(self.url(self.context.__parent__))
 
     def render(self):
         return u''
@@ -201,22 +201,10 @@ class AddFileForm(grok.AddForm):
             #    caption = filename
             #else:
             #    caption = data['title']
-            if contenttype in video_mimetypes:
-                file_ = MediaVideo(filename,
-                                   caption,
-                                   data['data'],
-                                   contenttype)
-            elif contenttype in image_mimetypes:
-                file_ = MediaImage(filename,
-                                   caption,
-                                   data['data'],
-                                   contenttype)
-            else:
-                file_ = MediaFile(filename,
-                                  caption,
-                                  data['data'],
-                                  contenttype)
-            mediacontainer[filename] = file_
+            if contenttype in image_mimetypes:
+                mediacontainer.invokeFactory('Image', filename, title=caption, image=data['data'])
+            elif contenttype in video_mimetypes:
+                mediacontainer.invokeFactory('File', filename, title=caption, file=data['data'])
 
 
 class DeleteMedia(grok.View):
@@ -319,12 +307,13 @@ class ImageMiniView(BaseImageView):
     size = (192, 192)
 
 
-# VIEWLETS
+# VIEWLETMANAGERS
 class MediaViewletManager(grok.ViewletManager):
     grok.name('newsitem.media')
     grok.require('zope2.View')
 
 
+# VIEWLETS
 class AddMediaViewlet(grok.Viewlet):
     grok.viewletmanager(MediaViewletManager)
     grok.require('zope2.View')
@@ -334,14 +323,11 @@ class AddMediaViewlet(grok.Viewlet):
         self.form = getMultiAdapter((self.context, self.request),
                                      name='add_media')
         self.form.update_form()
-        if self.request.method == 'POST':
-            #app = grok.getApplication()
-            #self.view.redirect(pps.portal_url)
 
     def render(self):
         return self.form.render()
 
-
+"""
 class BaseViewlet(grok.Viewlet):
     grok.viewletmanager(IAboveContentBody)
     grok.template('baseviewlet')
@@ -373,3 +359,4 @@ class BaseViewlet(grok.Viewlet):
     def is_video(self, key):
         media = self.newsmedia.getMediaContainer()
         return isinstance(media[key], MediaVideo)
+"""
